@@ -20,13 +20,24 @@ export class Chart {
 
   draw() {
     this.rootElement = this._appendRootElement()
-    var newLine = document.createElementNS('http://www.w3.org/2000/svg','line');
-    newLine.setAttribute('id','line2')
-    newLine.setAttribute('x1','0')
-    newLine.setAttribute('y1','0')
-    newLine.setAttribute('x2','500')
-    newLine.setAttribute('y2','500')
-    newLine.setAttribute("stroke", "black")
-    this.rootElement.appendChild(newLine)
+    this.drawLineTo(this.rootElement, this.data)
+  }
+
+  drawLineTo(container, data) {
+    const vector = document.createElementNS('http://www.w3.org/2000/svg','g')
+    container.appendChild(vector)
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path')
+    path.setAttribute('stroke', data.color)
+    path.setAttribute('fill', 'transparent')
+    path.setAttribute('d', this.getLineDefinition(this.data))
+    vector.appendChild(path)
+  }
+
+  getLineDefinition(data){
+      let result = `M${data.x[0]},${data.y[0]} `
+      for(let i = 1; i < data.x.length; i++){
+        result += `L${data.x[i]},${data.y[i]} `
+      }
+      return result
   }
 }
