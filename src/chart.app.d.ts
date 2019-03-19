@@ -7,7 +7,7 @@ export interface IChartInputData {
 
 interface IDataUnit {
   name: string
-  values: []
+  values: any[]
 }
 
 export interface IRangeUnit {
@@ -28,9 +28,28 @@ export interface IChartData {
   name: string
 }
 
+export interface IChartContext {
+  dataRange: IDataRange
+  chartOffset: IDataRange
+  containerSize: {
+    width: number
+    height: number
+  },
+  scale: {
+    x: (x: number) => number,
+    y: (y: number) => number
+  },
+  scaleBack: {
+    x: (x: number) => number
+  }
+}
+
 export interface IChartDataModel {
-   data: IChartData
-   dataRange: IDataRange
-   chartOffset: IDataRange
-   containerSize: IDataRange
+   data: IChartData[]
+   context: IChartContext
+}
+
+export interface ISelectedDataFrame{
+  from: number
+  to: number
 }

@@ -1,12 +1,80 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <style>
+      .chart{
+        width: 1000px;
+        height: 400px;
+        display: inline-block;
+      }
+      .scroll {
+        width: 1000px;
+        height: 100px;
+        display: inline-block;
+      }
+      text {
+        font-size: 11px;
+      }
+      .left,
+      .right {
+        cursor: col-resize;
+      }
+      .center {
+        cursor: all-scroll;
+      }
+    </style>
   </head>
   <body>
-      <div class="container">
-          
-      </div>
+    <div id="app">
+      <!-- <div class="chart-app">
+        <div class="chart"></div>
+        <div class="sideBar">
+          <svg>
+            <rect
+              class="offsetLeft"
+              x="0"
+              y="0"
+              width="0"
+              height="100"
+              style="fill: rgba(245, 249, 251, 0.6)"
+            ></rect>
+            <rect
+              class="left"
+              x="0"
+              y="0"
+              width="20"
+              height="100"
+              style="fill: rgba(221, 234, 242, 0.6)"
+            ></rect>
+            <rect
+              class="center"
+              x="22"
+              y="2"
+              width="956"
+              height="96"
+              style="fill: rgba(255, 255, 255, 0); stroke:rgba(221, 234, 242, 0.6); stroke-width:4px;"
+            ></rect>
+            <rect
+              class="right"
+              x="980"
+              y="0"
+              width="20"
+              height="100"
+              style="fill: rgba(221, 234, 242, 0.6)"
+            ></rect>
+            <rect
+              class="offsetRight"
+              x="1000"
+              y="0"
+              width="0"
+              height="100"
+              style="fill: rgba(245, 249, 251, 0.6)"
+            ></rect>
+          </svg>
+        </div>
+      </div> -->
+    </div>
   </body>
 </html>
