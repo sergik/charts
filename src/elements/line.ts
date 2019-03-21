@@ -16,22 +16,31 @@ interface DrawDataPoint {
 export class Line {
   public state: DrawDataPoint[]
   private path: SVGPathElement
+  private vector: SVGGElement
   private chartData: model.IChartData
+  private container: HTMLElement
   constructor(public name: string) {}
 
   public renderTo(container, dataModel: model.IChartDataModel) {
+    this.container = container
     this.chartData = dataModel.data.find(d => d.name == this.name)
-    const vector = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-    container.appendChild(vector)
-    if (!this.path) {
-      this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-      container.appendChild(this.path)
-    }
+    this.createLine()
+    this.state = this.generateDataPoints(this.chartData, dataModel.context)
+    this.draw(this.path, this.state)
+  }
+
+  private createLine(){
+    this.vector = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    this.container.appendChild(this.vector)
+    this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    this.vector.appendChild(this.path)
     this.path.setAttribute('stroke', this.chartData.color)
     this.path.setAttribute('fill', 'transparent')
     this.useDisplayOptions(this.path, this.chartData.displayOptions)
-    this.state = this.generateDataPoints(this.chartData, dataModel.context)
-    this.draw(this.path, this.state)
+  }
+
+  private removeLine(){
+    this.container.removeChild(this.vector)
   }
 
   public draw(path: SVGPathElement, points: DrawDataPoint[]) {
@@ -59,9 +68,16 @@ export class Line {
   }
 
   public rescaleTo(dataModel: model.IChartDataModel){
+    this.removeLine()
+    this.createLine()
     this.chartData = dataModel.data.find(d => d.name == this.name)
     this.state = this.generateDataPoints(this.chartData, dataModel.context)
     this.draw(this.path, this.state)
+    this.path.style.display = this.getDisplayStyle(this.chartData)
+  }
+
+  getDisplayStyle(chartData: model.IChartData){
+    return chartData.visible ? 'block': 'none'
   }
 
   getLineDefinition(points: DrawDataPoint[]) {

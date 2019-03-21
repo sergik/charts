@@ -1,43 +1,49 @@
 import * as constants from '../consts'
 import * as model from '../chart.app.d'
+import { SvgNamespace } from '../consts'
+import { getCountInterval } from '../helpers/count.intervals'
+import { getDateInterval } from '../helpers/date.intervals'
 
 interface DataPoint {
   value: number
   text: string
 }
 export class Axis {
-  constructor() {
+  private axisElements: SVGElement[] = []
+  private container: SVGElement
+  constructor() {}
+
+  public renderTo(container, dataModel: model.IChartDataModel) {
+    this.container = container
+    this.drawAxis(this.container, dataModel)
   }
-  
-  renderTo(container, dataModel: model.IChartDataModel) {
+
+  private drawAxis(container, dataModel){
     this.drawXLine(container, dataModel)
     this.drawYLines(container, dataModel)
   }
 
-  getCountInterval(maxY) {
-    const supportedIntervals = []
-    for (var i = 0; i < 7; i++) {
-      const multiplier = Math.pow(10, i)
-      supportedIntervals.push(1 * multiplier)
-      supportedIntervals.push(2 * multiplier)
-      supportedIntervals.push(3 * multiplier)
-      supportedIntervals.push(5 * multiplier)
-    }
-
-    return supportedIntervals.filter(i => maxY / i < 7)[0]
+  public rescaleTo(dataModel: model.IChartDataModel){
+    this.axisElements.forEach(e => {
+       this.container.removeChild(e)
+    })
+    this.axisElements = []
+    this.drawAxis(this.container, dataModel)
   }
 
-  getYDataPoints(dataModel: model.IChartDataModel): DataPoint[] {
+  private getYDataPoints(dataModel: model.IChartDataModel): DataPoint[] {
+    const dataRange = dataModel.context.dataRange.y
     const maxY = dataModel.context.dataRange.y.to
-    const interval = this.getCountInterval(maxY)
+    const interval = getCountInterval(maxY)
 
-    const intervals: number[] = []
     let currentVal = 0
-    let i = 0
+    const intervals = []
+    while (currentVal + interval < dataRange.from){
+      currentVal += interval
+    }
     while (currentVal < dataModel.context.dataRange.y.to) {
-      currentVal = i * interval
       intervals.push(currentVal)
-      i++
+      currentVal += interval
     }
 
     return intervals.map(i => ({
@@ -46,83 +52,80 @@ export class Axis {
     }))
   }
 
-  getXDataPoints(dataModel: model.IChartDataModel) {
-    const xPoints = 6
-    const xRange = dataModel.context.dataRange.x
-    const dayDiff = (xRange.to - xRange.from) / constants.DayInMiliseconds
-    const dayInterval = dayDiff / xPoints
+  private getXDataPoints(dataModel: model.IChartDataModel) {
+    const dataRange = dataModel.context.dataRange.x
+    const interval = getDateInterval(dataRange.from, dataRange.to)
 
-    const templateArray = []
-    for (let i = 0; i < xPoints; i++){
-      templateArray.push(i)
+    let currentVal = dataRange.from
+    const intervals = []
+
+    while (currentVal < dataRange.to) {
+      intervals.push(currentVal)
+      currentVal += interval
     }
-    return templateArray.map(index => {
-      const value = xRange.from + index * dayInterval * constants.DayInMiliseconds
-      return {
-        index,
-        value,
-        text: this.getDateText(value)
-      }
-    })
+
+    return intervals.map(i => ({
+      text: this.getDateText(i),
+      value: i
+    }))
   }
 
-  getDateText(date) {
+  private getDateText(date) {
     const jsDate = new Date(date)
     return `${jsDate.getDate()} ${constants.ShortMonthes[jsDate.getMonth()]}`
   }
 
-  drawXLine(container, dataModel: model.IChartDataModel) {
-    const vector = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-    container.appendChild(vector)
+  private drawXLine(container, dataModel: model.IChartDataModel) {
     this.getXDataPoints(dataModel).forEach(p => {
+      const vector = document.createElementNS(SvgNamespace, 'g')
+      container.appendChild(vector)
       this.drawXLabel(vector, p, dataModel)
+      this.axisElements.push(vector)
     })
   }
 
-  drawYLines(container, dataModel: model.IChartDataModel) {
-    const vector = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-    container.appendChild(vector)
+  private drawYLines(container, dataModel: model.IChartDataModel) {
     const xStart = dataModel.context.chartOffset.x.from
     const xEnd = dataModel.context.chartOffset.x.to
     this.getYDataPoints(dataModel).forEach(p => {
       const yVal = dataModel.context.scale.y(p.value)
-      this.drawLine(vector, { x: xStart, y: yVal }, { x: xEnd, y: yVal })
+      const vector = document.createElementNS(SvgNamespace, 'g')
+      container.appendChild(vector)
+      this.drawLine(vector, { x: xStart, y: yVal }, { x: xEnd, y: yVal }, 'chart-axis')
       this.drawLabel(vector, xStart, yVal - constants.YAxisLabelOffcet, p.text)
+      this.axisElements.push(vector)
     })
   }
 
-  drawLabel(container, x, y, text) {
-    const textEl = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'text'
-    )
+  private drawLabel(container, x, y, text) {
+    const textEl = document.createElementNS(SvgNamespace, 'text')
     textEl.setAttribute('x', x)
     textEl.setAttribute('y', y)
     textEl.innerHTML = text
     container.appendChild(textEl)
+    return textEl
   }
 
-  drawXLabel(container, dataPoint, dataModel: model.IChartDataModel) {
-    const textEl = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'text'
+  private drawXLabel(container, dataPoint, dataModel: model.IChartDataModel) {
+    return this.drawLabel(
+      container,
+      dataModel.context.scale.x(dataPoint.value),
+      dataModel.context.containerSize.height,
+      dataPoint.text
     )
-    textEl.setAttribute('x', dataModel.context.scale.x(dataPoint.value).toString())
-    textEl.setAttribute('y', dataModel.context.containerSize.height.toString())
-    textEl.innerHTML = dataPoint.text
-    container.appendChild(textEl)
   }
 
-  drawLine(container, start, end) {
-    const vector = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+  private drawLine(container, start, end, className) {
+    const vector = document.createElementNS(SvgNamespace, 'g')
     container.appendChild(vector)
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+    const line = document.createElementNS(SvgNamespace, 'line')
     line.setAttribute('x1', start.x)
     line.setAttribute('y1', start.y)
     line.setAttribute('x2', end.x)
     line.setAttribute('y2', end.y)
-    line.setAttribute('stroke-width', '1px')
-    line.setAttribute('stroke', '#000')
+    line.setAttribute('class', className)
     vector.appendChild(line)
+
+    return vector
   }
 }

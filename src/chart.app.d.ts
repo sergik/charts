@@ -26,6 +26,7 @@ export interface IChartData {
   displayOptions:Object
   color: string
   name: string
+  visible: boolean
 }
 
 export interface IChartContext {

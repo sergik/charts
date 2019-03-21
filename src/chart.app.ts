@@ -4,19 +4,24 @@ import { IChartInputData } from './chart.app.d'
 import { buildAppDataModel } from './helpers/app.model.builder'
 import * as model from './chart.app.d'
 import { ScrollBar } from './elements/scrol.bar'
+import { Selector } from './elements/selector'
+import { Tooltip } from './elements/tooltip';
 
 export class ChartApp {
   private dataModel: model.IChartDataModel
-  private elements: any
   private chartSvg: SVGSVGElement
   private chartAppRoot: HTMLDivElement
   private chartAreaRoot: HTMLDivElement
   private scrollAreaRoot: HTMLDivElement
   private scrollDataFrame: model.ISelectedDataFrame
+  private selectionState: {[id: string]: boolean}
   private chartLines: ChartLines
+  private scrollBar: ScrollBar
+  private axis: Axis
+  private selector: Selector
+  private tooltip: Tooltip
 
   constructor(private inputData: IChartInputData, private container: HTMLElement) {
-    this.elements = []
     this.container = container
   }
 
@@ -45,11 +50,23 @@ export class ChartApp {
 
   onScrollDataFrameChange(dataFrame){
     this.scrollDataFrame = dataFrame
+    this.updateState()
+  }
+
+  updateState(){
     this.dataModel = buildAppDataModel(this.inputData, {
       width: this.chartAreaRoot.clientWidth,
       height: this.chartAreaRoot.clientHeight
-    },this.scrollDataFrame)
+    },this.scrollDataFrame, this.selectionState)
+    this.axis.rescaleTo(this.dataModel)
     this.chartLines.rescaleTo(this.dataModel)
+    this.tooltip.rescaleTo(this.dataModel)
+  }
+
+  onSelectionStateChange(state){
+    this.selectionState = state
+    this.updateState()
+    this.scrollBar.rescaleTo(state)
   }
 
   draw() {
@@ -57,13 +74,18 @@ export class ChartApp {
     this.dataModel = buildAppDataModel(this.inputData, {
       width: this.chartAreaRoot.clientWidth,
       height: this.chartAreaRoot.clientHeight
-    })
-    const scrollBar = new ScrollBar((f) => this.onScrollDataFrameChange(f))
-    scrollBar.renderTo(this.scrollAreaRoot, this.inputData)
-    const axis = new Axis()
-    axis.renderTo(this.chartSvg, this.dataModel)
-    this.elements.push(axis)
+    },
+    this.scrollDataFrame,
+    this.selectionState)
+    this.scrollBar = new ScrollBar((f) => this.onScrollDataFrameChange(f))
+    this.scrollBar.renderTo(this.scrollAreaRoot, this.inputData)
+    this.axis = new Axis()
+    this.axis.renderTo(this.chartSvg, this.dataModel)
     this.chartLines = new ChartLines()
     this.chartLines.renderTo(this.chartSvg, this.dataModel)
+    this.selector = new Selector((s) => this.onSelectionStateChange(s))
+    this.selector.renderTo(this.chartAppRoot, this.dataModel)
+    this.tooltip = new Tooltip()
+    this.tooltip.renderTo(this.chartSvg, this.dataModel)
   }
 }
