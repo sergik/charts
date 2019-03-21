@@ -14,7 +14,7 @@ export class Tooltip {
     this.container = container
     this.dataModel = dataModel
     this.container.addEventListener('mouseleave', e => {
-        this.removeElements(container)
+      this.removeElements(container)
     })
     const showTooltipHandler = e => {
       const xCord = getMousePositionX(e, this.container)
@@ -31,8 +31,8 @@ export class Tooltip {
   }
 
   public rescaleTo(dataModel: IChartDataModel) {
-      this.removeElements(this.container)
-      this.dataModel = dataModel
+    this.removeElements(this.container)
+    this.dataModel = dataModel
   }
 
   private removeElements(container: SVGElement) {
@@ -40,9 +40,9 @@ export class Tooltip {
       container.removeChild(this.tooltip)
       this.tooltip = null
     }
-    if (this.line){
-        container.removeChild(this.line)
-        this.line = null
+    if (this.line) {
+      container.removeChild(this.line)
+      this.line = null
     }
 
     this.dataPoints.forEach(d => {
@@ -51,10 +51,17 @@ export class Tooltip {
 
     this.dataPoints = []
   }
-  private createElements(container: SVGElement, dataModel: IChartDataModel, pointIndex) {
+  private createElements(
+    container: SVGElement,
+    dataModel: IChartDataModel,
+    pointIndex
+  ) {
+    if (this.dataModel.data.every(d => !d.visible)) {
+      return
+    }
     const xVal = dataModel.data[0].x.values[pointIndex]
     const xCord = dataModel.context.scale.x(xVal)
-    const xCordStr  = xCord.toString()
+    const xCordStr = xCord.toString()
     this.line = document.createElementNS(consts.SvgNamespace, 'line')
     this.line.setAttribute('x1', xCordStr)
     this.line.setAttribute('y1', dataModel.context.chartOffset.y.to)
@@ -77,7 +84,6 @@ export class Tooltip {
     tooltipDiv.setAttribute('class', 'tooltip')
     fo.appendChild(tooltipDiv)
 
-
     const headerDiv = document.createElement('div')
     tooltipDiv.appendChild(headerDiv)
 
@@ -91,60 +97,74 @@ export class Tooltip {
     this.addValueElements(valsDiv, dataModel, pointIndex)
 
     const resultWidth = tooltipDiv.offsetWidth
-    let tooltipX = xCord - resultWidth/2
-    if(tooltipX < 0){
+    let tooltipX = xCord - resultWidth / 2
+    if (tooltipX < 0) {
       tooltipX = 0
     }
 
-    if(xCord + resultWidth > dataModel.context.chartOffset.x.to){
+    if (xCord + resultWidth > dataModel.context.chartOffset.x.to) {
       tooltipX = dataModel.context.chartOffset.x.to - resultWidth
     }
     fo.setAttribute('x', tooltipX.toString())
   }
 
-  private addValueElements(container: HTMLElement, dataModel: IChartDataModel, index){
-      dataModel.data.forEach((d, i) => {
-          const dataContainer = document.createElement('div')
-          let containerClass = 'data-container'
-          if(i > 0){
-            containerClass += ' padding-left'
-          }
-          dataContainer.setAttribute('class', containerClass)
-          dataContainer.style.color = d.color
-          container.appendChild(dataContainer)
+  private addValueElements(
+    container: HTMLElement,
+    dataModel: IChartDataModel,
+    index
+  ) {
+    dataModel.data
+      .filter(d => d.visible)
+      .forEach((d, i) => {
+        const dataContainer = document.createElement('div')
+        let containerClass = 'data-container'
+        if (i > 0) {
+          containerClass += ' padding-left'
+        }
+        dataContainer.setAttribute('class', containerClass)
+        dataContainer.style.color = d.color
+        container.appendChild(dataContainer)
 
-          const valTextEl = document.createElement('div')
-          valTextEl.innerHTML = d.y.values[index]
-          valTextEl.setAttribute('class', 'value-text')
-          dataContainer.appendChild(valTextEl)
-          
-          const nameTextEl = document.createElement('div')
-          nameTextEl.innerHTML = d.name
-          nameTextEl.setAttribute('class', 'name-text')
-          dataContainer.appendChild(nameTextEl)
+        const valTextEl = document.createElement('div')
+        valTextEl.innerHTML = d.y.values[index]
+        valTextEl.setAttribute('class', 'value-text')
+        dataContainer.appendChild(valTextEl)
+
+        const nameTextEl = document.createElement('div')
+        nameTextEl.innerHTML = d.name
+        nameTextEl.setAttribute('class', 'name-text')
+        dataContainer.appendChild(nameTextEl)
       })
   }
 
-  private drawDataPoints(container: SVGElement, dataModel: IChartDataModel, index){
-    dataModel.data.forEach(d => {
-      const xCord = dataModel.context.scale.x(d.x.values[index])
-      const yCord = dataModel.context.scale.y(d.y.values[index])
-      const circle = document.createElementNS(consts.SvgNamespace, 'circle')
-      circle.setAttributeNS(null, 'r', '4')
-      circle.setAttributeNS(null, 'class', 'data-point')
-      circle.setAttributeNS(null, 'cx', xCord.toString())
-      circle.setAttributeNS(null, 'cy', yCord.toString())
-      circle.setAttributeNS(null, 'stroke', d.color)
-      circle.setAttributeNS(null, 'stroke-width', '3')
-      this.dataPoints.push(circle)
-      this.container.appendChild(circle)
-    })
+  private drawDataPoints(
+    container: SVGElement,
+    dataModel: IChartDataModel,
+    index
+  ) {
+    dataModel.data
+      .filter(d => d.visible)
+      .forEach(d => {
+        const xCord = dataModel.context.scale.x(d.x.values[index])
+        const yCord = dataModel.context.scale.y(d.y.values[index])
+        const circle = document.createElementNS(consts.SvgNamespace, 'circle')
+        circle.setAttributeNS(null, 'r', '4')
+        circle.setAttributeNS(null, 'class', 'data-point')
+        circle.setAttributeNS(null, 'cx', xCord.toString())
+        circle.setAttributeNS(null, 'cy', yCord.toString())
+        circle.setAttributeNS(null, 'stroke', d.color)
+        circle.setAttributeNS(null, 'stroke-width', '3')
+        this.dataPoints.push(circle)
+        this.container.appendChild(circle)
+      })
   }
 
-  getDateText(val){   
-        const jsDate = new Date(val)
-        const dayOfWeek = consts.DayNames[jsDate.getDay()]
-        return `${dayOfWeek}, ${jsDate.getDate()} ${consts.ShortMonthes[jsDate.getMonth()]}`
+  getDateText(val) {
+    const jsDate = new Date(val)
+    const dayOfWeek = consts.DayNames[jsDate.getDay()]
+    return `${dayOfWeek}, ${jsDate.getDate()} ${
+      consts.ShortMonthes[jsDate.getMonth()]
+    }`
   }
 
   getDisplayStyle(visible) {

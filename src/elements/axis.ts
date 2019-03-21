@@ -3,6 +3,7 @@ import * as model from '../chart.app.d'
 import { SvgNamespace } from '../consts'
 import { getCountInterval } from '../helpers/count.intervals'
 import { getDateInterval } from '../helpers/date.intervals'
+import { SvgElementsPool } from '../elements/elements.pool'
 
 interface DataPoint {
   value: number
@@ -11,9 +12,13 @@ interface DataPoint {
 export class Axis {
   private axisElements: SVGElement[] = []
   private container: SVGElement
+  private elementsPool: SvgElementsPool
+  private lines: SVGElement[] = []
   constructor() {}
 
   public renderTo(container, dataModel: model.IChartDataModel) {
+    this.elementsPool = new SvgElementsPool(container)
+    this.elementsPool.init()
     this.container = container
     this.drawAxis(this.container, dataModel)
   }
@@ -24,10 +29,15 @@ export class Axis {
   }
 
   public rescaleTo(dataModel: model.IChartDataModel){
+    if(dataModel.data.every(d => !d.visible)){
+      return
+    }
     this.axisElements.forEach(e => {
        this.container.removeChild(e)
+       this.lines.forEach(l => l.setAttribute('opacity', '0'))
     })
     this.axisElements = []
+    this.lines = []
     this.drawAxis(this.container, dataModel)
   }
 
@@ -89,11 +99,10 @@ export class Axis {
     const xEnd = dataModel.context.chartOffset.x.to
     this.getYDataPoints(dataModel).forEach(p => {
       const yVal = dataModel.context.scale.y(p.value)
-      const vector = document.createElementNS(SvgNamespace, 'g')
-      container.appendChild(vector)
-      this.drawLine(vector, { x: xStart, y: yVal }, { x: xEnd, y: yVal }, 'chart-axis')
-      this.drawLabel(vector, xStart, yVal - constants.YAxisLabelOffcet, p.text)
-      this.axisElements.push(vector)
+      const line = this.drawLine({ x: xStart, y: yVal }, { x: xEnd, y: yVal }, 'chart-axis')
+      this.lines.push(line)
+      const label = this.drawLabel(container, xStart, yVal - constants.YAxisLabelOffcet, p.text)
+      this.axisElements.push(label)
     })
   }
 
@@ -115,17 +124,15 @@ export class Axis {
     )
   }
 
-  private drawLine(container, start, end, className) {
-    const vector = document.createElementNS(SvgNamespace, 'g')
-    container.appendChild(vector)
-    const line = document.createElementNS(SvgNamespace, 'line')
+  private drawLine(start, end, className) {
+    const line = this.elementsPool.getElement('line')
+    line.setAttribute('opacity', '1')
     line.setAttribute('x1', start.x)
     line.setAttribute('y1', start.y)
     line.setAttribute('x2', end.x)
     line.setAttribute('y2', end.y)
     line.setAttribute('class', className)
-    vector.appendChild(line)
 
-    return vector
+    return line
   }
 }

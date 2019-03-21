@@ -87,5 +87,11 @@ export class ChartApp {
     this.selector.renderTo(this.chartAppRoot, this.dataModel)
     this.tooltip = new Tooltip()
     this.tooltip.renderTo(this.chartSvg, this.dataModel)
+
+    window.addEventListener('resize', (e) => {
+      this.chartSvg.setAttribute('width', this.chartAreaRoot.clientWidth.toString())
+      this.chartSvg.setAttribute('height', this.chartAreaRoot.clientHeight.toString())
+      this.updateState()
+    })
   }
 }

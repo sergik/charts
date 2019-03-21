@@ -87,9 +87,6 @@ export class ScrollBar {
     this.scrollHeight = this.container.clientHeight
     const dataModel = this.buildModel(selectionState)
     this.chartLines.rescaleTo(dataModel)
-    this.removeScrolElements()
-    this.createElements()
-    this.addEventListeners()
   }
 
   private createSvg(container: HTMLElement) {
@@ -122,6 +119,20 @@ export class ScrollBar {
     const scrollerColor = 'rgba(221, 234, 242, 0.6)'
     const offsetColor = 'rgba(245, 249, 251, 0.6)'
     this.offsetLeft = this.createRect(0, 0, 0, this.scrollHeight, offsetColor)
+    this.center = this.createRect(
+      scrollerWidht + this.halfCenterStrokeWidth,
+      this.halfCenterStrokeWidth,
+      this.scrollWidth - this.centerStrokeWidth - 2 * scrollerWidht,
+      this.scrollHeight - this.centerStrokeWidth,
+      'rgba(255, 255, 255, 0)'
+    )
+    this.center.setAttributeNS(
+      null,
+      'stroke-width',
+      this.centerStrokeWidth.toString()
+    )
+    this.center.setAttributeNS(null, 'stroke', 'rgba(221, 234, 242, 0.6)')
+    this.center.setAttributeNS(null, 'class', 'center')
     this.left = this.createRect(
       0,
       0,
@@ -145,34 +156,33 @@ export class ScrollBar {
       this.scrollHeight,
       offsetColor
     )
-    this.center = this.createRect(
-      scrollerWidht + this.halfCenterStrokeWidth,
-      this.halfCenterStrokeWidth,
-      this.scrollWidth - this.centerStrokeWidth - 2 * scrollerWidht,
-      this.scrollHeight - this.centerStrokeWidth,
-      'rgba(255, 255, 255, 0)'
-    )
-    this.center.setAttributeNS(
-      null,
-      'stroke-width',
-      this.centerStrokeWidth.toString()
-    )
-    this.center.setAttributeNS(null, 'stroke', 'rgba(221, 234, 242, 0.6)')
-    this.center.setAttributeNS(null, 'class', 'center')
   }
 
   private addEventListeners() {
     this.left.addEventListener('mousedown', e => this.startDragLeft(e))
     this.left.addEventListener('mouseup', e => this.endDrag(e))
+    this.left.addEventListener('touchstart', e => this.startDragLeft(e))
+    this.left.addEventListener('touchend', e => this.endDrag(e))
+
     this.center.addEventListener('mousedown', e => this.startDragCenter(e))
     this.center.addEventListener('mouseup', e => this.endDrag(e))
+
+    this.center.addEventListener('touchstart', e => this.startDragCenter(e))
+    this.center.addEventListener('touchend', e => this.endDrag(e))
+
     this.right.addEventListener('mousedown', e => this.startDragRight(e))
     this.right.addEventListener('mouseup', e => this.endDrag(e))
+
+    this.right.addEventListener('touchstart', e => this.startDragRight(e))
+    this.right.addEventListener('touchend', e => this.endDrag(e))
     this.svg.addEventListener('mousemove', e => this.drag(e))
     const body = document.getElementsByTagName('body')[0]
     body.addEventListener('mouseup', e => this.endDrag(e))
     body.addEventListener('mouseleave', e => this.endDrag(e))
-    //this.svg.addEventListener('mouseleave', e => this.endDrag(e))
+    this.svg.addEventListener('mouseup', e => this.endDrag(e))
+    this.svg.addEventListener('touchmove', e => this.drag(e))
+    this.svg.addEventListener('touchleave', e => this.endDrag(e))
+    this.svg.addEventListener('touchcancel', e => this.endDrag(e))
   }
 
   private startDrag(evt, slection) {
@@ -328,7 +338,9 @@ export class ScrollBar {
   }
 
   private endDrag(evt) {
-    this.drag(evt)
+    try {
+      this.drag(evt)
+    } catch (e) {}
     this.selectedElement = null
     this.selectedType = ''
   }

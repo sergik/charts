@@ -1,3 +1,5 @@
+do not change axis on last unchecked
+generate y ranges not from 0
 2. line pool
 3. transitions
 4. resize
