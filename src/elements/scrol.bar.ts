@@ -4,7 +4,7 @@ import { ChartLines } from './chart.lines'
 import * as model from '../chart.app.d'
 import { getMousePositionX } from '../helpers/svg.helpers'
 
-const scrollerWidht = 20
+const scrollerWidht = 30
 export class ScrollBar {
   public constructor(
     private selectedDataFrameChange: (

@@ -35,6 +35,7 @@
 
       .round label {
         border: 1px solid #ccc;
+        background-color: #fff;
         border-radius: 50%;
         cursor: pointer;
         height: 28px;
@@ -44,8 +45,13 @@
         width: 28px;
       }
 
+      .night .round label {
+        background-color: rgb(34, 46, 72);
+      }
+
       .round label:after {
         border: 2px solid #fff;
+
         border-top: none;
         border-right: none;
         content: '';
@@ -122,13 +128,13 @@
       }
       .chart-axis {
         stroke-width: 1px;
-        stroke: rgb(242,244,245);
+        stroke: rgb(242, 244, 245);
       }
-      .tooltip-line{
+      .tooltip-line {
         stroke-width: 1px;
         stroke: rgb(216, 216, 216);
       }
-      .tooltip{
+      .tooltip {
         position: relative;
         display: inline-block;
         border: 1px solid rgb(216, 216, 216);
@@ -136,38 +142,38 @@
         border-radius: 5px;
         background-color: white;
       }
-      .night .tooltip{
-        background-color: rgb(37, 50, 64)
+      .night .tooltip {
+        background-color: rgb(37, 50, 64);
       }
-      .tooltip h3{
+      .tooltip h3 {
         font-size: 16px;
         margin: 0px;
         margin-bottom: 5px;
       }
-      .night .tooltip h3{
+      .night .tooltip h3 {
         color: white;
       }
-      .data-point{
-        fill: white
+      .data-point {
+        fill: white;
       }
 
-      .night .data-point{
-        fill: rgb(34, 46, 72)
+      .night .data-point {
+        fill: rgb(34, 46, 72);
       }
 
-      .tooltip .data-container{
+      .tooltip .data-container {
         display: inline-block;
       }
 
-      .tooltip .padding-left{
-        padding-left: 20px
+      .tooltip .padding-left {
+        padding-left: 20px;
       }
 
-      .tooltip .value-text{
+      .tooltip .value-text {
         font-size: 16px;
         font-weight: bold;
       }
-      .tooltip .name-text{
+      .tooltip .name-text {
         font-size: 12px;
       }
     </style>

@@ -60,8 +60,8 @@ export class Selector {
       label.style.backgroundColor = color
       label.style.borderColor = color
     } else {
-      label.style.backgroundColor = '#fff'
-      label.style.borderColor = '#bbb'
+      label.style.backgroundColor = ''
+      label.style.borderColor = ''
     }
   }
 }
