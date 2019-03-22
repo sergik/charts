@@ -5,7 +5,8 @@ import { buildAppDataModel } from './helpers/app.model.builder'
 import * as model from './chart.app.d'
 import { ScrollBar } from './elements/scrol.bar'
 import { Selector } from './elements/selector'
-import { Tooltip } from './elements/tooltip';
+import { Tooltip } from './elements/tooltip'
+import { StateTransition } from './elements/stateTransition'
 
 export class ChartApp {
   private dataModel: model.IChartDataModel
@@ -14,14 +15,18 @@ export class ChartApp {
   private chartAreaRoot: HTMLDivElement
   private scrollAreaRoot: HTMLDivElement
   private scrollDataFrame: model.ISelectedDataFrame
-  private selectionState: {[id: string]: boolean}
+  private selectionState: { [id: string]: boolean }
   private chartLines: ChartLines
   private scrollBar: ScrollBar
   private axis: Axis
   private selector: Selector
   private tooltip: Tooltip
+  private transiton: StateTransition
 
-  constructor(private inputData: IChartInputData, private container: HTMLElement) {
+  constructor(
+    private inputData: IChartInputData,
+    private container: HTMLElement
+  ) {
     this.container = container
   }
 
@@ -42,55 +47,83 @@ export class ChartApp {
       'http://www.w3.org/2000/svg',
       'svg'
     )
-    this.chartSvg.setAttribute('width', this.chartAreaRoot.clientWidth.toString())
-    this.chartSvg.setAttribute('height', this.chartAreaRoot.clientHeight.toString())
+    this.chartSvg.setAttribute(
+      'width',
+      this.chartAreaRoot.clientWidth.toString()
+    )
+    this.chartSvg.setAttribute(
+      'height',
+      this.chartAreaRoot.clientHeight.toString()
+    )
     this.chartAreaRoot.appendChild(this.chartSvg)
     return this.chartSvg
   }
 
-  onScrollDataFrameChange(dataFrame){
+  onScrollDataFrameChange(dataFrame) {
     this.scrollDataFrame = dataFrame
     this.updateState()
   }
 
-  updateState(){
-    this.dataModel = buildAppDataModel(this.inputData, {
-      width: this.chartAreaRoot.clientWidth,
-      height: this.chartAreaRoot.clientHeight
-    },this.scrollDataFrame, this.selectionState)
-    this.axis.rescaleTo(this.dataModel)
-    this.chartLines.rescaleTo(this.dataModel)
-    this.tooltip.rescaleTo(this.dataModel)
+  updateState() {
+    const newDataModel = buildAppDataModel(
+      this.inputData,
+      {
+        width: this.chartAreaRoot.clientWidth,
+        height: this.chartAreaRoot.clientHeight
+      },
+      this.scrollDataFrame,
+      this.selectionState
+    )
+
+    this.tooltip.rescaleTo(newDataModel)
+    this.transiton.rescaleTo(this.dataModel, newDataModel)
   }
 
-  onSelectionStateChange(state){
+  onSelectionStateChange(state) {
     this.selectionState = state
+    this.dataModel.data.forEach(d => {
+      d.visible = state[d.y.name]
+    })
     this.updateState()
     this.scrollBar.rescaleTo(state)
   }
 
   draw() {
     this.appendElements()
-    this.dataModel = buildAppDataModel(this.inputData, {
-      width: this.chartAreaRoot.clientWidth,
-      height: this.chartAreaRoot.clientHeight
-    },
-    this.scrollDataFrame,
-    this.selectionState)
-    this.scrollBar = new ScrollBar((f) => this.onScrollDataFrameChange(f))
+    this.dataModel = buildAppDataModel(
+      this.inputData,
+      {
+        width: this.chartAreaRoot.clientWidth,
+        height: this.chartAreaRoot.clientHeight
+      },
+      this.scrollDataFrame,
+      this.selectionState
+    )
+    this.scrollBar = new ScrollBar(f => this.onScrollDataFrameChange(f))
     this.scrollBar.renderTo(this.scrollAreaRoot, this.inputData)
     this.axis = new Axis()
     this.axis.renderTo(this.chartSvg, this.dataModel)
     this.chartLines = new ChartLines()
     this.chartLines.renderTo(this.chartSvg, this.dataModel)
-    this.selector = new Selector((s) => this.onSelectionStateChange(s))
+    this.selector = new Selector(s => this.onSelectionStateChange(s))
     this.selector.renderTo(this.chartAppRoot, this.dataModel)
     this.tooltip = new Tooltip()
     this.tooltip.renderTo(this.chartSvg, this.dataModel)
+    this.transiton = new StateTransition((newDataModel) => {
+      this.dataModel = newDataModel
+      this.axis.rescaleTo(this.dataModel)
+      this.chartLines.rescaleTo(this.dataModel)
+    })
 
-    window.addEventListener('resize', (e) => {
-      this.chartSvg.setAttribute('width', this.chartAreaRoot.clientWidth.toString())
-      this.chartSvg.setAttribute('height', this.chartAreaRoot.clientHeight.toString())
+    window.addEventListener('resize', e => {
+      this.chartSvg.setAttribute(
+        'width',
+        this.chartAreaRoot.clientWidth.toString()
+      )
+      this.chartSvg.setAttribute(
+        'height',
+        this.chartAreaRoot.clientHeight.toString()
+      )
       this.updateState()
     })
   }

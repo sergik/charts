@@ -4,7 +4,7 @@ import { ChartLines } from './chart.lines'
 import * as model from '../chart.app.d'
 import { getMousePositionX } from '../helpers/svg.helpers'
 
-const scrollerWidht = 30
+const scrollerWidht = 50
 export class ScrollBar {
   public constructor(
     private selectedDataFrameChange: (
@@ -94,14 +94,6 @@ export class ScrollBar {
     this.svg.setAttributeNS(null, 'width', this.scrollWidth.toString())
     this.svg.setAttributeNS(null, 'height', this.scrollHeight.toString())
     container.appendChild(this.svg)
-  }
-
-  private removeScrolElements() {
-    this.svg.removeChild(this.offsetLeft)
-    this.svg.removeChild(this.left)
-    this.svg.removeChild(this.center)
-    this.svg.removeChild(this.right)
-    this.svg.removeChild(this.offsetRight)
   }
 
   private createRect(x, y, width, height, fill): SVGRectElement {

@@ -2,46 +2,39 @@ import * as model from '../chart.app.d'
 import * as consts from '../consts'
 import { LinearScale } from '../scales/linear'
 
-// export function preprocessData(inputData: model.IChartInputData): model.IPreprocessedInputData {
-//   const columns = {}
-//   inputData.columns.forEach(c => {
-//     const name = c[0]
-//     const data = c.slice(1, c.length - 1)
-//     columns[name] = data
-//   })
+export function rebuildToFrame(
+   currentModel: model.IChartDataModel,
+   newFrame: model.IDataRange
+ ): model.IChartDataModel {
+  
+  const dataPoints = getDataPoints(newFrame.x, currentModel.inputData)
+  currentModel.data.forEach(d => {
+    d.x = dataPoints.x
+    d.y = dataPoints.yData.find(y => y.name == d.y.name)
+  })
+  currentModel.context.frameRange = newFrame
+  const xTransformation = new LinearScale(newFrame.x, currentModel.context.chartOffset.x)
+  const xTransformationBack = new LinearScale(currentModel.context.chartOffset.x, newFrame.x)
+  const yTransformation = new LinearScale(newFrame.y, currentModel.context.chartOffset.y)
+  currentModel.context.scale.x = x => xTransformation.scale(x)
+  currentModel.context.scale.y = y => yTransformation.scale(y)
+  currentModel.context.scaleBack.x = x => xTransformationBack.scale(x)
 
-//   return {
-//     columns,
-//     colors: inputData.colors,
-//     names: inputData.names,
-//     types: inputData.types
-//   }
-// }
 
-export function buildAppDataModel(
-  inputData: model.IChartInputData,
-  containerSize: {
-    width: number
-    height: number
-  },
-  scrollDataFrame: model.ISelectedDataFrame,
-  selectionState: { [id: string]: boolean }
-): model.IChartDataModel {
-  const chartOffset: model.IDataRange = {
-    x: { from: 0, to: containerSize.width - 5 },
-    y: { from: containerSize.height - consts.AxisWidth, to: 10 }
-  }
+  return currentModel
+}
 
+function getDataPoints(newFrame: model.IRangeUnit, inputData: model.IChartInputData){
   let fromIndex = 1
   let toIndex = inputData.columns[0].length - 1
-  if (scrollDataFrame) {
+  if (newFrame) {
     fromIndex =
-      inputData.columns[0].findIndex(val => val >= scrollDataFrame.from) - 1
+      inputData.columns[0].findIndex(val => val >= newFrame.from) - 1
     if (fromIndex < 1) {
       fromIndex = 1
     }
     toIndex =
-      inputData.columns[0].findIndex(val => val >= scrollDataFrame.to) + 1
+      inputData.columns[0].findIndex(val => val >= newFrame.to) + 1
     if (toIndex < 1 || toIndex > inputData.columns[0].length - 1) {
       toIndex = inputData.columns[0].length - 1
     }
@@ -58,11 +51,33 @@ export function buildAppDataModel(
     }
   })
 
-  const data = yData.map(y => ({
+  return {
     x: {
-      name: xName,
-      values: xData
+      values: xData,
+      name: xName
     },
+    yData
+  }
+}
+
+export function buildAppDataModel(
+  inputData: model.IChartInputData,
+  containerSize: {
+    width: number
+    height: number
+  },
+  scrollDataFrame: model.ISelectedDataFrame,
+  selectionState: { [id: string]: boolean }
+): model.IChartDataModel {
+  const chartOffset: model.IDataRange = {
+    x: { from: 0, to: containerSize.width - 5 },
+    y: { from: containerSize.height - consts.AxisWidth, to: 10 }
+  }
+
+  const dataPoints = getDataPoints(scrollDataFrame, inputData)
+  
+  const data = dataPoints.yData.map(y => ({
+    x: dataPoints.x,
     y,
     displayOptions: {
       'stroke-width': '3px'
@@ -73,8 +88,8 @@ export function buildAppDataModel(
   }))
 
   const frameRange = {
-    x: getDataRangeX(xData, scrollDataFrame),
-    y: getDataRangeY(yData, selectionState)
+    x: getDataRangeX(dataPoints.x.values, scrollDataFrame),
+    y: getDataRangeY(dataPoints.yData, selectionState)
   }
 
   const xTransformation = new LinearScale(frameRange.x, chartOffset.x)
@@ -123,5 +138,7 @@ function getDataRangeY(
     }
   }
 
-  return { from: 0, to: Math.max(...max) }
+  let to = max.length < 1 ?  0 : Math.max(...max)
+
+  return { from: 0, to }
 }
