@@ -26,7 +26,7 @@ export class Tooltip {
         this.createElements(container, this.dataModel, closestPointIndex)
       }
     }
-    this.container.addEventListener('mousemove', e => showTooltipHandler(e))
+    //this.container.addEventListener('mousemove', e => showTooltipHandler(e))
     this.container.addEventListener('click', e => showTooltipHandler(e))
   }
 

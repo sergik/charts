@@ -42,8 +42,8 @@ export class Axis {
   }
 
   private getYDataPoints(dataModel: model.IChartDataModel): DataPoint[] {
-    const dataRange = dataModel.context.dataRange.y
-    const maxY = dataModel.context.dataRange.y.to
+    const dataRange = dataModel.context.frameRange.y
+    const maxY = dataModel.context.frameRange.y.to
     const interval = getCountInterval(maxY)
 
     let currentVal = 0
@@ -51,7 +51,7 @@ export class Axis {
     while (currentVal + interval < dataRange.from){
       currentVal += interval
     }
-    while (currentVal < dataModel.context.dataRange.y.to) {
+    while (currentVal < dataModel.context.frameRange.y.to) {
       intervals.push(currentVal)
       currentVal += interval
     }
@@ -63,10 +63,10 @@ export class Axis {
   }
 
   private getXDataPoints(dataModel: model.IChartDataModel) {
-    const dataRange = dataModel.context.dataRange.x
+    const dataRange = dataModel.context.frameRange.x
     const interval = getDateInterval(dataRange.from, dataRange.to)
 
-    let currentVal = dataRange.from
+    let currentVal = dataModel.inputData.columns[0][1]//dataRange.from
     const intervals = []
 
     while (currentVal < dataRange.to) {

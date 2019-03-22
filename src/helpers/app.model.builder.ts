@@ -2,6 +2,22 @@ import * as model from '../chart.app.d'
 import * as consts from '../consts'
 import { LinearScale } from '../scales/linear'
 
+// export function preprocessData(inputData: model.IChartInputData): model.IPreprocessedInputData {
+//   const columns = {}
+//   inputData.columns.forEach(c => {
+//     const name = c[0]
+//     const data = c.slice(1, c.length - 1)
+//     columns[name] = data
+//   })
+
+//   return {
+//     columns,
+//     colors: inputData.colors,
+//     names: inputData.names,
+//     types: inputData.types
+//   }
+// }
+
 export function buildAppDataModel(
   inputData: model.IChartInputData,
   containerSize: {
@@ -56,18 +72,19 @@ export function buildAppDataModel(
     visible: !selectionState || selectionState[y.name]
   }))
 
-  const dataRange = {
+  const frameRange = {
     x: getDataRangeX(xData, scrollDataFrame),
     y: getDataRangeY(yData, selectionState)
   }
 
-  const xTransformation = new LinearScale(dataRange.x, chartOffset.x)
-  const xTransformationBack = new LinearScale(chartOffset.x, dataRange.x)
-  const yTransformation = new LinearScale(dataRange.y, chartOffset.y)
+  const xTransformation = new LinearScale(frameRange.x, chartOffset.x)
+  const xTransformationBack = new LinearScale(chartOffset.x, frameRange.x)
+  const yTransformation = new LinearScale(frameRange.y, chartOffset.y)
   return {
+    inputData,
     data,
     context: {
-      dataRange,
+      frameRange,
       containerSize,
       chartOffset,
       scale: {

@@ -5,6 +5,13 @@ export interface IChartInputData {
   colors: { [index: string]: string }
 }
 
+export interface IPreprocessedInputData {
+  columns: {[id: string]: Array<number>}
+  types: { [index: string]: string }
+  names: { [index: string]: string }
+  colors: { [index: string]: string }
+}
+
 interface IDataUnit {
   name: string
   values: any[]
@@ -30,7 +37,7 @@ export interface IChartData {
 }
 
 export interface IChartContext {
-  dataRange: IDataRange
+  frameRange: IDataRange
   chartOffset: IDataRange
   containerSize: {
     width: number
@@ -48,6 +55,7 @@ export interface IChartContext {
 export interface IChartDataModel {
    data: IChartData[]
    context: IChartContext
+   inputData: IChartInputData
 }
 
 export interface ISelectedDataFrame{

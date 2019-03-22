@@ -228,17 +228,8 @@ export class ScrollBar {
   }
 
   private dragCenter(selectionNewX, selecctioOldX) {
-    const offsetRightX = parseFloat(this.offsetRight.getAttributeNS(null, 'x'))
-    const offsetRightWidth = parseFloat(
-      this.offsetRight.getAttributeNS(null, 'width')
-    )
     const rightWidth = parseFloat(this.right.getAttributeNS(null, 'width'))
     const leftWidth = parseFloat(this.left.getAttributeNS(null, 'width'))
-    const offsetLeftWidth = parseFloat(
-      this.offsetLeft.getAttributeNS(null, 'width')
-    )
-    const rightX = parseFloat(this.right.getAttributeNS(null, 'x'))
-    const leftX = parseFloat(this.left.getAttributeNS(null, 'x'))
     const centerWidth = parseFloat(this.center.getAttributeNS(null, 'width'))
     if (selectionNewX - leftWidth - this.centerStrokeWidth / 2 < 0) {
       selectionNewX = leftWidth + this.centerStrokeWidth / 2
@@ -252,16 +243,26 @@ export class ScrollBar {
     }
     let dragDelta = selectionNewX - selecctioOldX
     this.selectedElement.setAttributeNS(null, 'x', selectionNewX.toString())
-    this.left.setAttributeNS(null, 'x', (leftX + dragDelta).toString())
-    this.offsetLeft.setAttributeNS(
-      null,
-      'width',
-      (offsetLeftWidth + dragDelta).toString()
+
+    this.moveRightElements(dragDelta)
+    this.moveLeftElements(dragDelta)
+  }
+
+  private moveRightElements(dragDelta){
+    const rightX = parseFloat(this.right.getAttributeNS(null, 'x'))
+    const offsetRightX = parseFloat(this.offsetRight.getAttributeNS(null, 'x'))
+    const offsetRightWidth = parseFloat(
+      this.offsetRight.getAttributeNS(null, 'width')
     )
+
+    let newOffsetWidth = offsetRightWidth - dragDelta;
+    if(newOffsetWidth < 0){
+      newOffsetWidth = 0
+    }
     this.offsetRight.setAttributeNS(
       null,
       'width',
-      (offsetRightWidth - dragDelta).toString()
+      newOffsetWidth.toString()
     )
     this.offsetRight.setAttributeNS(
       null,
@@ -272,9 +273,7 @@ export class ScrollBar {
   }
 
   private dragLeft(selectionNewX, selecctioOldX) {
-    const offsetLeftWidth = parseFloat(
-      this.offsetLeft.getAttributeNS(null, 'width')
-    )
+    
     const centerX = parseFloat(this.center.getAttributeNS(null, 'x'))
     const centerWidth = parseFloat(this.center.getAttributeNS(null, 'width'))
     const rightX = parseFloat(this.right.getAttributeNS(null, 'x'))
@@ -287,12 +286,20 @@ export class ScrollBar {
 
     let dragDelta = selectionNewX - selecctioOldX
 
-    this.selectedElement.setAttributeNS(null, 'x', selectionNewX.toString())
     this.center.setAttributeNS(null, 'x', (centerX + dragDelta).toString())
     this.center.setAttributeNS(
       null,
       'width',
       (centerWidth - dragDelta).toString()
+    )
+    this.moveLeftElements(dragDelta)
+  }
+
+  private moveLeftElements(dragDelta){
+    const leftX = parseFloat(this.left.getAttributeNS(null, 'x'))
+    this.left.setAttributeNS(null, 'x', (leftX + dragDelta).toString())
+    const offsetLeftWidth = parseFloat(
+      this.offsetLeft.getAttributeNS(null, 'width')
     )
     this.offsetLeft.setAttributeNS(
       null,
@@ -302,10 +309,6 @@ export class ScrollBar {
   }
 
   private dragRight(selectionNewX, selecctioOldX) {
-    const offsetRightWidth = parseFloat(
-      this.offsetRight.getAttributeNS(null, 'width')
-    )
-    const offsetRightX = parseFloat(this.offsetRight.getAttributeNS(null, 'x'))
     const centerWidth = parseFloat(this.center.getAttributeNS(null, 'width'))
     const leftX = parseFloat(this.left.getAttributeNS(null, 'x'))
     const leftWidth = parseFloat(this.left.getAttributeNS(null, 'width'))
@@ -319,22 +322,13 @@ export class ScrollBar {
 
     let dragDelta = selectionNewX - selecctioOldX
 
-    this.selectedElement.setAttributeNS(null, 'x', selectionNewX.toString())
     this.center.setAttributeNS(
       null,
       'width',
       (centerWidth + dragDelta).toString()
     )
-    this.offsetRight.setAttributeNS(
-      null,
-      'width',
-      (offsetRightWidth - dragDelta).toString()
-    )
-    this.offsetRight.setAttributeNS(
-      null,
-      'x',
-      (offsetRightX + dragDelta).toString()
-    )
+
+    this.moveRightElements(dragDelta)
   }
 
   private endDrag(evt) {
