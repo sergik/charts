@@ -3,10 +3,7 @@ import { ChartApp } from './chart.app'
 import { ThemeSelector } from './elements/theme.selector'
 const dataUrl = 'https://sergeyvolkovich.neocities.org/chart_data.json'
 const appElement = document.getElementById('app')
-document.onselectstart = function()
-{
-    window.getSelection().removeAllRanges();
-};
+
 
 // fetch(dataUrl).then(response => {
 //   response.json().then(data => {

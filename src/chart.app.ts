@@ -81,10 +81,16 @@ export class ChartApp {
 
   onSelectionStateChange(state) {
     this.selectionState = state
+    this.dataModel.context.selection = state
     this.dataModel.data.forEach(d => {
       d.visible = state[d.y.name]
     })
-    this.updateState()
+    if(!this.dataModel.data.every(d => !d.visible)){
+      this.updateState()
+    }else{
+      this.tooltip.rescaleTo(this.dataModel)
+      this.chartLines.rescaleTo(this.dataModel)
+    }
     this.scrollBar.rescaleTo(state)
   }
 
@@ -103,7 +109,7 @@ export class ChartApp {
     this.scrollBar.renderTo(this.scrollAreaRoot, this.inputData)
     this.axis = new Axis()
     this.axis.renderTo(this.chartSvg, this.dataModel)
-    this.chartLines = new ChartLines()
+    this.chartLines = new ChartLines(true)
     this.chartLines.renderTo(this.chartSvg, this.dataModel)
     this.selector = new Selector(s => this.onSelectionStateChange(s))
     this.selector.renderTo(this.chartAppRoot, this.dataModel)

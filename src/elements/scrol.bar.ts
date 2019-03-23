@@ -55,7 +55,7 @@ export class ScrollBar {
     this.halfCenterStrokeWidth = this.centerStrokeWidth / 2
     this.createSvg(container)
     this.dataModel = this.buildModel()
-    this.chartLines = new ChartLines()
+    this.chartLines = new ChartLines(false)
     this.chartLines.renderTo(this.svg, this.dataModel)
     this.createElements()
     this.addEventListeners()
@@ -272,8 +272,8 @@ export class ScrollBar {
     if (selectionNewX < 0) {
       selectionNewX = 0
     }
-    if (rightX - selectionNewX < 50) {
-      selectionNewX = rightX - 50
+    if (rightX - selectionNewX - scrollerWidht < 50) {
+      selectionNewX = rightX - 50 - scrollerWidht
     }
 
     let dragDelta = selectionNewX - selecctioOldX

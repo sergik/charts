@@ -16,10 +16,18 @@ export class SvgElementsPool {
   }
 
   private elementAvailable(element: SVGElement) {
-    return element.getAttribute('opacity') == '0'
+    return window.getComputedStyle(element).getPropertyValue('opacity') == '0'
   }
 
   public getElement(tagName: string) {
-    return this.pool[tagName].find(e => this.elementAvailable(e))
+    let element = this.pool[tagName].find(e => this.elementAvailable(e))
+    if (!element) {
+      const orderedElements = this.pool[tagName].sort(e =>
+        parseFloat(window.getComputedStyle(e).getPropertyValue('opacity'))
+      )
+      element = orderedElements[0]
+    }
+
+    return element
   }
 }

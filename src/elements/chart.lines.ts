@@ -3,7 +3,7 @@ import { Line } from './line'
 
 export class ChartLines {
     private lines: Line[] = []
-    constructor(){
+    constructor(private redraw){
     }
 
     public renderTo(container, dataModel: IChartDataModel) {
@@ -15,6 +15,6 @@ export class ChartLines {
     }
 
     public rescaleTo(dataModel: IChartDataModel){
-      this.lines.forEach(l => l.rescaleTo(dataModel))
+      this.lines.forEach(l => l.rescaleTo(dataModel, this.redraw))
     }
 }

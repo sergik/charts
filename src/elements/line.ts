@@ -67,7 +67,11 @@ export class Line {
     }
   }
 
-  public rescaleTo(dataModel: model.IChartDataModel){
+  public rescaleTo(dataModel: model.IChartDataModel, redraw?){
+    if(redraw){
+      this.removeLine()
+      this.createLine()
+    }
     this.chartData = dataModel.data.find(d => d.name == this.name)
     this.state = this.generateDataPoints(this.chartData, dataModel.context)
     this.draw(this.path, this.state)

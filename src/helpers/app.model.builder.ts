@@ -1,6 +1,7 @@
 import * as model from '../chart.app.d'
 import * as consts from '../consts'
 import { LinearScale } from '../scales/linear'
+import { getCountInterval } from './count.intervals';
 
 export function rebuildToFrame(
    currentModel: model.IChartDataModel,
@@ -19,6 +20,10 @@ export function rebuildToFrame(
   currentModel.context.scale.x = x => xTransformation.scale(x)
   currentModel.context.scale.y = y => yTransformation.scale(y)
   currentModel.context.scaleBack.x = x => xTransformationBack.scale(x)
+  currentModel.context.dataRange = {
+    x: getDataRangeX(dataPoints.x.values, newFrame.x),
+    y: getDataRangeY(dataPoints.yData, currentModel.context.selection)
+  }
 
 
   return currentModel
@@ -71,7 +76,7 @@ export function buildAppDataModel(
 ): model.IChartDataModel {
   const chartOffset: model.IDataRange = {
     x: { from: 0, to: containerSize.width - 5 },
-    y: { from: containerSize.height - consts.AxisWidth, to: 10 }
+    y: { from: containerSize.height - consts.AxisWidth, to: 15 }
   }
 
   const dataPoints = getDataPoints(scrollDataFrame, inputData)
@@ -87,10 +92,12 @@ export function buildAppDataModel(
     visible: !selectionState || selectionState[y.name]
   }))
 
-  const frameRange = {
+  const dataRange = {
     x: getDataRangeX(dataPoints.x.values, scrollDataFrame),
     y: getDataRangeY(dataPoints.yData, selectionState)
   }
+
+  const frameRange = getFrameRange(dataRange)
 
   const xTransformation = new LinearScale(frameRange.x, chartOffset.x)
   const xTransformationBack = new LinearScale(chartOffset.x, frameRange.x)
@@ -99,6 +106,8 @@ export function buildAppDataModel(
     inputData,
     data,
     context: {
+      dataRange,
+      selection: selectionState,
       frameRange,
       containerSize,
       chartOffset,
@@ -138,7 +147,26 @@ function getDataRangeY(
     }
   }
 
-  let to = max.length < 1 ?  0 : Math.max(...max)
+  let to = max.length < 1 ?  1 : Math.max(...max)
+  let from = min.length < 1 ?  0 : Math.min(...min)
 
-  return { from: 0, to }
+  return { from, to }
+}
+
+function getFrameRange(dataRange){
+  let interval = getCountInterval(dataRange.y.to - dataRange.y.from)
+  if(!interval){
+    interval = 1
+  }
+
+  const yFrom =  Math.trunc(dataRange.y.from/interval) * interval
+  const frameRange = {
+    x: dataRange.x,
+    y: {
+      from: yFrom,
+      to: dataRange.y.to
+    }
+  }
+
+  return frameRange
 }

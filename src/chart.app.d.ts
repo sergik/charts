@@ -37,6 +37,8 @@ export interface IChartData {
 }
 
 export interface IChartContext {
+  selection:  { [id: string]: boolean }
+  dataRange: IDataRange
   frameRange: IDataRange
   chartOffset: IDataRange
   containerSize: {

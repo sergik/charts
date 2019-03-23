@@ -1,5 +1,5 @@
-export const AxisWidth = 20
-export const YAxisLabelOffcet = 3
+export const AxisWidth = 25
+export const YAxisLabelOffcet = 5
 export const ShortMonthes = [
   'Jan',
   'Feb',
