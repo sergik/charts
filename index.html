@@ -4,6 +4,22 @@
     <meta charset="utf-8" />
     <title><%= htmlWebpackPlugin.options.title %></title>
     <style>
+      @-webkit-keyframes fadeIn {
+            0% {opacity: 0;}
+            100% {opacity: 1;}
+         }
+
+         @keyframes fadeIn {
+            0% {opacity: 0;}
+            100% {opacity: 1;}
+         }
+
+         .fadeIn {
+          opacity: 1;
+          transition: opacity 0.5s linear;
+         }
+
+        
       .fadeout {
         opacity: 0;
         transition: opacity 0.5s linear;
@@ -21,7 +37,8 @@
         padding: 10px;
         padding-top: 5px;
         padding-bottom: 5px;
-        margin-left: 20px;
+        margin-left: 30px;
+        height: 50px;
       }
       .checkbox-container {
         display: inline-block;
@@ -32,7 +49,9 @@
         display: inline-block;
         position: relative;
         color: rgb(64, 69, 72);
-        top: 5px;
+        font-size: 20px;
+        top: 10px;
+        padding-left: 20px;
       }
       .round {
         position: relative;
@@ -46,11 +65,11 @@
         background-color: #fff;
         border-radius: 50%;
         cursor: pointer;
-        height: 28px;
+        height: 40px;
         left: 0;
         position: absolute;
         top: 0;
-        width: 28px;
+        width: 40px;
       }
 
       .night .round label {
@@ -64,10 +83,10 @@
         border-right: none;
         content: '';
         height: 6px;
-        left: 7px;
+        left: 13px;
         opacity: 0;
         position: absolute;
-        top: 8px;
+        top: 14px;
         transform: rotate(-45deg);
         width: 12px;
       }
@@ -85,16 +104,25 @@
         background-color: white;
       }
 
+      .chart-app path{
+        stroke-width: 3px
+      }
+
       .chart {
         width: 100%;
         height: 500px;
         display: inline-block;
       }
+
       .scroll {
         padding-top: 20px;
         width: 100%;
         height: 100px;
         display: inline-block;
+      }
+
+      .scroll path{
+        stroke-width: 2px;
       }
 
       @media screen and (min-height: 1200px) {
@@ -127,13 +155,11 @@
         cursor: all-scroll;
       }
       .switch {
-        padding: 20px;
-      }
-      .switch {
+        padding: 50px;
         color: rgb(37, 143, 244);
         text-align: center;
         cursor: pointer;
-        font-size: 20px;
+        font-size: 30px;
       }
 
       .night {

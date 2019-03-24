@@ -7,6 +7,7 @@ import { ScrollBar } from './elements/scrol.bar'
 import { Selector } from './elements/selector'
 import { Tooltip } from './elements/tooltip'
 import { StateTransition } from './elements/stateTransition'
+import { AxisTransitionAdapter } from './elements/axis.transition.adapter'
 
 export class ChartApp {
   private dataModel: model.IChartDataModel
@@ -18,7 +19,7 @@ export class ChartApp {
   private selectionState: { [id: string]: boolean }
   private chartLines: ChartLines
   private scrollBar: ScrollBar
-  private axis: Axis
+  private axisTransition: AxisTransitionAdapter
   private selector: Selector
   private tooltip: Tooltip
   private transiton: StateTransition
@@ -75,7 +76,6 @@ export class ChartApp {
       this.selectionState
     )
 
-    this.tooltip.rescaleTo(newDataModel)
     this.transiton.rescaleTo(this.dataModel, newDataModel)
   }
 
@@ -85,9 +85,9 @@ export class ChartApp {
     this.dataModel.data.forEach(d => {
       d.visible = state[d.y.name]
     })
-    if(!this.dataModel.data.every(d => !d.visible)){
+    if (!this.dataModel.data.every(d => !d.visible)) {
       this.updateState()
-    }else{
+    } else {
       this.tooltip.rescaleTo(this.dataModel)
       this.chartLines.rescaleTo(this.dataModel)
     }
@@ -107,30 +107,20 @@ export class ChartApp {
     )
     this.scrollBar = new ScrollBar(f => this.onScrollDataFrameChange(f))
     this.scrollBar.renderTo(this.scrollAreaRoot, this.inputData)
-    this.axis = new Axis()
-    this.axis.renderTo(this.chartSvg, this.dataModel)
+    const axis = new Axis()
+    this.axisTransition = new AxisTransitionAdapter(axis)
+    this.axisTransition.renderTo(this.chartSvg, this.dataModel)
     this.chartLines = new ChartLines(true)
     this.chartLines.renderTo(this.chartSvg, this.dataModel)
     this.selector = new Selector(s => this.onSelectionStateChange(s))
     this.selector.renderTo(this.chartAppRoot, this.dataModel)
     this.tooltip = new Tooltip()
     this.tooltip.renderTo(this.chartSvg, this.dataModel)
-    this.transiton = new StateTransition((newDataModel) => {
+    this.transiton = new StateTransition(newDataModel => {
       this.dataModel = newDataModel
-      this.axis.rescaleTo(this.dataModel)
       this.chartLines.rescaleTo(this.dataModel)
-    })
-
-    window.addEventListener('resize', e => {
-      this.chartSvg.setAttribute(
-        'width',
-        this.chartAreaRoot.clientWidth.toString()
-      )
-      this.chartSvg.setAttribute(
-        'height',
-        this.chartAreaRoot.clientHeight.toString()
-      )
-      this.updateState()
+      this.tooltip.rescaleTo(this.dataModel)
+      this.axisTransition.rescaleTo(this.dataModel)
     })
   }
 }

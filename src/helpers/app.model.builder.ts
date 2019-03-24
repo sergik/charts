@@ -2,6 +2,7 @@ import * as model from '../chart.app.d'
 import * as consts from '../consts'
 import { LinearScale } from '../scales/linear'
 import { getCountInterval } from './count.intervals';
+import { getDateInterval } from '../helpers/date.intervals'
 
 export function rebuildToFrame(
    currentModel: model.IChartDataModel,
@@ -23,6 +24,10 @@ export function rebuildToFrame(
   currentModel.context.dataRange = {
     x: getDataRangeX(dataPoints.x.values, newFrame.x),
     y: getDataRangeY(dataPoints.yData, currentModel.context.selection)
+  }
+  currentModel.context.axis = {
+    x: getXAxisDataPoints(currentModel.context.frameRange.x, currentModel.inputData.columns[0][1]),
+    y: getYAxisDataPoints(currentModel.context.dataRange.y, currentModel.context.frameRange.y)
   }
 
 
@@ -106,6 +111,10 @@ export function buildAppDataModel(
     inputData,
     data,
     context: {
+      axis: {
+        x: getXAxisDataPoints(frameRange.x, inputData.columns[0][1]),
+        y: getYAxisDataPoints(dataRange.y, frameRange.y)
+      },
       dataRange,
       selection: selectionState,
       frameRange,
@@ -120,6 +129,27 @@ export function buildAppDataModel(
       }
     }
   }
+}
+
+function getXAxisDataPoints(frameRange: model.IRangeUnit, from) {
+  const interval = getDateInterval(frameRange.from, frameRange.to)
+
+  const intervals = []
+
+  while (from < frameRange.to) {
+    intervals.push(from)
+    from += interval
+  }
+
+  return intervals.map(i => ({
+    text: getDateText(i),
+    value: i
+  }))
+}
+
+function getDateText(date) {
+  const jsDate = new Date(date)
+  return `${jsDate.getDate()} ${consts.ShortMonthes[jsDate.getMonth()]}`
 }
 
 function getDataRangeX(
@@ -169,4 +199,21 @@ function getFrameRange(dataRange){
   }
 
   return frameRange
+}
+
+function getYAxisDataPoints(dataRange: model.IRangeUnit, frameRange: model.IRangeUnit): model.DataPoint[] {
+  const range = dataRange.to - dataRange.from
+  const interval = getCountInterval(range)
+
+  let currentVal = Math.trunc(dataRange.from / interval) * interval
+  const intervals = []
+  while (currentVal < frameRange.to) {
+    intervals.push(currentVal)
+    currentVal += interval
+  }
+
+  return intervals.map(i => ({
+    text: i.toString(),
+    value: i
+  }))
 }

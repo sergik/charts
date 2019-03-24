@@ -29,7 +29,8 @@ export class StateTransition {
       yIterationFrom,
       xIterationTo,
       yIterationTo,
-      from
+      from,
+      to
     )
   }
 
@@ -38,7 +39,8 @@ export class StateTransition {
     yIterationFrom,
     xIterationTo,
     yIterationTo,
-    currentModel
+    currentModel,
+    toModel: model.IChartDataModel
   ) {
     let framesCount = 0
     let cancelled = false
@@ -59,6 +61,9 @@ export class StateTransition {
         newFrame.y.to += yIterationTo
 
         const newModel = rebuildToFrame(model, newFrame)
+        newModel.context.transition = {
+          to: toModel
+        }
         this.applyTranstion(newModel)
         if (
             framesCount < this.transitionIn - 1

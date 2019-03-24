@@ -36,7 +36,6 @@ export class Line {
     this.vector.appendChild(this.path)
     this.path.setAttribute('stroke', this.chartData.color)
     this.path.setAttribute('fill', 'transparent')
-    this.useDisplayOptions(this.path, this.chartData.displayOptions)
   }
 
   private removeLine(){
@@ -59,12 +58,6 @@ export class Line {
         }
       }
     })
-  }
-
-  useDisplayOptions(path, options) {
-    for (var propt in options) {
-      path.setAttribute(propt, options[propt])
-    }
   }
 
   public rescaleTo(dataModel: model.IChartDataModel, redraw?){

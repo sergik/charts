@@ -30,13 +30,19 @@ export interface IDataRange {
 export interface IChartData {
   x: IDataUnit
   y: IDataUnit
-  displayOptions:Object
   color: string
   name: string
   visible: boolean
 }
 
 export interface IChartContext {
+  transition?: {
+    to: IChartDataModel
+  }
+  axis: {
+    x: DataPoint[],
+    y: DataPoint[]
+  }
   selection:  { [id: string]: boolean }
   dataRange: IDataRange
   frameRange: IDataRange
@@ -63,4 +69,15 @@ export interface IChartDataModel {
 export interface ISelectedDataFrame{
   from: number
   to: number
+}
+
+interface DataPoint {
+  value: number
+  text: string
+}
+
+interface AxisElement {
+  point: DataPoint
+  label: SVGTextElement
+  line?: SVGLineElement
 }

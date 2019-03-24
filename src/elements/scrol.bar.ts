@@ -73,11 +73,6 @@ export class ScrollBar {
       null,
       selectionState
     )
-    this.dataModel.data.forEach(d => {
-      d.displayOptions = {
-        'stroke-width': '2px'
-      }
-    })
 
     return this.dataModel
   }
